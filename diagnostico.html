@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico — Informe Hogs and Pigs</title>
+<style>
+  body{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;background:#12171a;color:#dfe6e4;
+    margin:0;padding:28px;line-height:1.5;font-size:13.5px}
+  h1{font-family:system-ui,sans-serif;font-size:22px;margin:0 0 4px;color:#fff}
+  p.lead{color:#93a1a0;margin:0 0 20px;font-family:system-ui,sans-serif}
+  .card{background:#182024;border:1px solid #263238;border-radius:4px;margin:12px 0;padding:14px 16px}
+  .card h2{font-size:14px;margin:0 0 8px;color:#8fd0c8;font-weight:600}
+  .status{display:inline-block;padding:2px 8px;border-radius:3px;font-weight:600;font-size:12px}
+  .ok{background:#123524;color:#4ade80} .bad{background:#3a1518;color:#f87171} .warn{background:#3a3212;color:#fbbf24}
+  pre{white-space:pre-wrap;word-break:break-word;background:#0d1215;border:1px solid #22303a;border-radius:3px;
+    padding:10px;margin:8px 0 0;max-height:280px;overflow:auto;color:#b7c4c2;font-size:12px}
+  .k{color:#8fd0c8} .v{color:#e9d8a6} .muted{color:#6b7c7a}
+  button{background:#0f5060;color:#fff;border:none;padding:9px 16px;border-radius:4px;cursor:pointer;
+    font-family:inherit;font-size:13px;font-weight:600}
+  button:hover{background:#0a3742}
+  a{color:#8fd0c8}
+  table{width:100%;border-collapse:collapse;margin-top:8px;font-size:12.5px}
+  td,th{border-bottom:1px solid #22303a;padding:5px 8px;text-align:left}
+  th{color:#8fd0c8}
+</style>
+</head>
+<body>
+  <h1>Diagnóstico · Informe Hogs and Pigs</h1>
+  <p class="lead">Prueba cada consulta por separado a través de los proxies de Netlify. Muestra el status HTTP, el error exacto y los primeros registros para verificar los <code>short_desc</code> reales que devuelve NASS. <a href="/index.html">← Volver al informe</a></p>
+  <button id="run">Ejecutar todas las pruebas</button>
+  <div id="out"></div>
+
+<script>
+const NASS_KEY='EB7D3956-F3E0-3023-A6E7-602F604D4B67';
+const out=document.getElementById('out');
+
+function card(title){ const c=document.createElement('div'); c.className='card';
+  c.innerHTML='<h2>'+title+'</h2><div class="body">probando…</div>'; out.appendChild(c); return c.querySelector('.body'); }
+function badge(cls,txt){ return '<span class="status '+cls+'">'+txt+'</span>'; }
+
+async function nassRaw(params){
+  const qs=new URLSearchParams({key:NASS_KEY,format:'JSON',...params});
+  const url='/nass-api?'+qs.toString();
+  const t0=performance.now();
+  const res=await fetch(url);
+  const ms=Math.round(performance.now()-t0);
+  const text=await res.text();
+  let json=null; try{ json=JSON.parse(text); }catch(e){}
+  return {ok:res.ok,status:res.status,ms,text,json,url};
+}
+
+async function testNass(title, params, classifier){
+  const b=card(title);
+  try{
+    const r=await nassRaw(params);
+    const n = r.json && r.json.data ? r.json.data.length : 0;
+    let head = (r.ok && n>0) ? badge('ok','HTTP '+r.status+' · '+n+' registros · '+r.ms+'ms')
+             : (r.ok ? badge('warn','HTTP '+r.status+' · 0 registros · '+r.ms+'ms')
+             : badge('bad','HTTP '+r.status+' · '+r.ms+'ms'));
+    let body='<div>'+head+'</div>';
+    body+='<div class="muted" style="margin-top:6px">'+decodeURIComponent(r.url)+'</div>';
+    if(r.json && r.json.data && n>0){
+      const sample=r.json.data[0];
+      const keys=['short_desc','reference_period_desc','year','Value','unit_desc','statisticcat_desc','class_desc','domain_desc'];
+      let tbl='<table><tr>'+keys.map(k=>'<th>'+k+'</th>').join('')+'</tr><tr>'+keys.map(k=>'<td>'+(sample[k]!==undefined?sample[k]:'')+'</td>').join('')+'</tr></table>';
+      body+=tbl;
+      // distintos short_desc presentes
+      const sds=[...new Set(r.json.data.map(d=>d.short_desc))].slice(0,40);
+      body+='<div class="muted" style="margin-top:8px">short_desc distintos ('+sds.length+' primeros):</div><pre>'+sds.join('\n')+'</pre>';
+      if(classifier){ body+=classifier(r.json.data); }
+    } else {
+      body+='<pre>'+r.text.slice(0,400)+'</pre>';
+    }
+    b.innerHTML=body;
+    return r;
+  }catch(e){ b.innerHTML=badge('bad','ERROR')+'<pre>'+(e.message||e)+'</pre>'; }
+}
+
+function num(s){const n=Number(String(s).replace(/,/g,''));return Number.isFinite(n)?n:null;}
+// deriva las métricas clave desde el pool, tal como hace el informe
+function poolClassifier(data){
+  const up=s=>(s||'').toUpperCase();
+  const groups={
+    'Rebaño reproductor': data.filter(d=>up(d.short_desc)==='HOGS, BREEDING - INVENTORY'),
+    'Total cerdos':        data.filter(d=>up(d.short_desc)==='HOGS - INVENTORY'),
+    'Cerdos de mercado':   data.filter(d=>up(d.short_desc)==='HOGS, MARKET - INVENTORY'),
+    'Por peso (LBS)':      data.filter(d=>up(d.short_desc).startsWith('HOGS, MARKET, MEASURED IN LBS')),
+    'Pig crop':            data.filter(d=>up(d.short_desc).includes('PIG CROP')),
+    'Pigs per litter':     data.filter(d=>up(d.short_desc).includes('PER LITTER')),
+    'Sows farrowing':      data.filter(d=>up(d.short_desc).includes('FARROWING') && !up(d.short_desc).includes('INTENTIONS')),
+    'Intenciones':         data.filter(d=>up(d.short_desc).includes('INTENTIONS')),
+  };
+  let rows='';
+  for(const k in groups){
+    const g=groups[k].filter(d=>['','TOTAL'].includes(up(d.domain_desc)));
+    let latest='—';
+    if(g.length){
+      const sorted=[...g].sort((a,b)=>parseInt(b.year)-parseInt(a.year));
+      const s=sorted[0];
+      latest=s.year+' · '+s.reference_period_desc+' = '+s.Value+' '+(s.unit_desc||'');
+    }
+    rows+='<tr><td>'+k+'</td><td>'+g.length+'</td><td>'+latest+'</td></tr>';
+  }
+  return '<div class="muted" style="margin-top:10px">Clasificación por short_desc (como en el informe):</div>'+
+    '<table><tr><th>Métrica</th><th>#</th><th>Registro más reciente</th></tr>'+rows+'</table>';
+}
+
+async function testYahoo(title, path){
+  const b=card(title);
+  try{
+    const t0=performance.now();
+    const res=await fetch(path);
+    const ms=Math.round(performance.now()-t0);
+    const text=await res.text();
+    let j=null; try{ j=JSON.parse(text); }catch(e){}
+    const r=j&&j.chart&&j.chart.result&&j.chart.result[0];
+    if(res.ok && r){
+      const meta=r.meta||{};
+      const cl=(r.indicators.quote[0].close||[]).filter(x=>x!=null);
+      b.innerHTML=badge('ok','HTTP '+res.status+' · '+ms+'ms')+
+        '<table><tr><th>símbolo</th><th>precio</th><th>cierre previo</th><th>puntos</th></tr>'+
+        '<tr><td>'+(meta.symbol||'HE=F')+'</td><td>'+(meta.regularMarketPrice??'—')+'</td><td>'+(meta.chartPreviousClose??'—')+'</td><td>'+cl.length+'</td></tr></table>';
+    } else {
+      b.innerHTML=badge(res.ok?'warn':'bad','HTTP '+res.status+' · '+ms+'ms')+'<pre>'+text.slice(0,400)+'</pre>';
+    }
+  }catch(e){ b.innerHTML=badge('bad','ERROR')+'<pre>'+(e.message||e)+'</pre>'; }
+}
+
+async function runAll(){
+  out.innerHTML='';
+  // 1) Consulta amplia principal (la que usa el informe)
+  await testNass('1 · Pool principal — HOGS · NATIONAL · SURVEY · TOTAL (year≥2013)',
+    {commodity_desc:'HOGS',agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2013},
+    poolClassifier);
+  // 2) Pool acotado (fallback si el principal supera 50k)
+  await testNass('2 · Pool acotado (fallback) — year≥2019',
+    {commodity_desc:'HOGS',agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2019},
+    poolClassifier);
+  // 3) Por statisticcat (último recurso)
+  await testNass('3 · statisticcat = INVENTORY',
+    {commodity_desc:'HOGS',statisticcat_desc:'INVENTORY',agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2023});
+  await testNass('4 · statisticcat = PIG CROP',
+    {commodity_desc:'HOGS',statisticcat_desc:'PIG CROP',agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2023});
+  await testNass('5 · statisticcat = FARROWINGS',
+    {commodity_desc:'HOGS',statisticcat_desc:'FARROWINGS',agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2023});
+  await testNass('6 · statisticcat = PIGS SAVED PER LITTER',
+    {commodity_desc:'HOGS',statisticcat_desc:'PIGS SAVED PER LITTER',agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2023});
+  // 7-8) Yahoo
+  await testYahoo('7 · Yahoo Lean Hogs — /yahoo (query1)', '/yahoo/v8/finance/chart/HE=F?range=1y&interval=1d');
+  await testYahoo('8 · Yahoo Lean Hogs — /yahoo2 (query2)', '/yahoo2/v8/finance/chart/HE=F?range=1y&interval=1d');
+}
+
+document.getElementById('run').addEventListener('click', runAll);
+runAll();
+</script>
+</body>
+</html>
