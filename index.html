@@ -3,790 +3,414 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Informe Hogs and Pigs — USDA NASS (datos en vivo)</title>
+<title>Informe Hogs and Pigs — USDA NASS (tablas en vivo)</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Zilla+Slab:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --paper:#eef1ee;        /* papel de registro, gris-verde frío */
-    --panel:#ffffff;
-    --ink:#171d1f;          /* casi negro frío */
-    --ink-soft:#4a5560;
-    --line:#d3dad6;
-    --line-soft:#e6eae7;
-    --petrol:#0f5060;       /* acento estructural */
-    --petrol-deep:#0a3742;
-    --pos:#1e7a4f;          /* dato positivo */
-    --neg:#b23a48;          /* dato negativo */
-    --neutral:#9a7314;      /* sin cambio */
-    --amber:#b7791f;
+    --paper:#eef1ee; --panel:#ffffff; --ink:#171d1f; --ink-soft:#4a5560;
+    --line:#d3dad6; --line-soft:#e6eae7; --petrol:#0f5060; --petrol-deep:#0a3742;
+    --pos:#1e7a4f; --neg:#b23a48; --neutral:#8a7a3a;
+    --zebra:#f6f8f7; --head:#0a3742;
     --shadow:0 1px 0 rgba(23,29,31,.04), 0 8px 30px -18px rgba(15,80,96,.35);
   }
   *{box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
-  body{
-    margin:0;background:var(--paper);color:var(--ink);
-    font-family:'Inter',system-ui,sans-serif;line-height:1.55;
-    background-image:linear-gradient(var(--line-soft) 1px,transparent 1px);
-    background-size:100% 28px;background-position:0 -1px;
-  }
-  .wrap{max-width:1120px;margin:0 auto;padding:0 20px 80px}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;line-height:1.5;font-size:15px}
+  .wrap{max-width:1240px;margin:0 auto;padding:0 18px 80px}
   a{color:var(--petrol)}
   .mono{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
 
-  /* ---------- Header ---------- */
-  header.masthead{padding:40px 0 22px;border-bottom:2px solid var(--ink)}
-  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;
-    text-transform:uppercase;color:var(--petrol);font-weight:600;display:flex;
-    gap:10px;align-items:center;flex-wrap:wrap}
-  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--pos);
-    box-shadow:0 0 0 3px rgba(30,122,79,.18)}
+  header.masthead{padding:38px 0 18px;border-bottom:2px solid var(--ink)}
+  .eyebrow{font-family:'IBM Plex Mono',monospace;font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--petrol);font-weight:600;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--pos);box-shadow:0 0 0 3px rgba(30,122,79,.18)}
   .eyebrow .dot.stale{background:var(--neg);box-shadow:0 0 0 3px rgba(178,58,72,.18)}
-  h1{font-family:'Zilla Slab',serif;font-weight:700;font-size:clamp(34px,6vw,58px);
-    line-height:.98;margin:14px 0 6px;letter-spacing:-.01em}
-  .sub{font-size:15px;color:var(--ink-soft);max-width:62ch}
-  .sub b{color:var(--ink);font-weight:600}
-  .meta-row{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:16px;align-items:center}
-  .bias-chip{display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;
-    font-size:13px;font-weight:600;padding:7px 13px;border-radius:2px;border:1px solid var(--line);
-    background:var(--panel)}
-  .bias-chip .bar{width:3px;height:15px;background:var(--neutral);border-radius:2px}
+  h1{font-family:'Zilla Slab',serif;font-weight:700;font-size:clamp(30px,5vw,50px);line-height:1;margin:12px 0 8px;letter-spacing:-.01em}
+  .summary{font-size:15px;color:var(--ink-soft);max-width:80ch}
+  .summary b{color:var(--ink);font-weight:600}
+  .meta-row{display:flex;flex-wrap:wrap;gap:8px 16px;margin-top:14px;align-items:center}
   .stamp{font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink-soft)}
-  .refresh-btn{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:12px;
-    border:1px solid var(--line);background:var(--panel);color:var(--ink);
-    padding:6px 11px;border-radius:2px;cursor:pointer}
+  .refresh-btn{margin-left:auto;font-family:'IBM Plex Mono',monospace;font-size:12px;border:1px solid var(--line);
+    background:var(--panel);color:var(--ink);padding:6px 11px;border-radius:2px;cursor:pointer}
   .refresh-btn:hover{border-color:var(--petrol);color:var(--petrol)}
 
-  /* ---------- Fatal / loading ---------- */
-  #fatal{display:none;margin:22px 0;padding:16px 18px;border:1px solid var(--neg);
-    border-left-width:4px;background:#fdf3f4;border-radius:2px;font-size:14px}
-  #fatal a{font-weight:600}
+  #fatal{display:none;margin:20px 0;padding:15px 18px;border:1px solid var(--neg);border-left-width:4px;
+    background:#fdf3f4;border-radius:2px;font-size:14px}
   .skeleton{color:transparent!important;background:linear-gradient(90deg,#e7ebe8,#f3f6f4,#e7ebe8);
     background-size:200% 100%;animation:sk 1.3s infinite;border-radius:2px}
   @keyframes sk{0%{background-position:200% 0}100%{background-position:-200% 0}}
+  @media (prefers-reduced-motion: reduce){.skeleton{animation:none}}
 
-  /* ---------- KPI strip ---------- */
-  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line);
-    border:1px solid var(--line);margin:26px 0;box-shadow:var(--shadow)}
-  .kpi{background:var(--panel);padding:18px 18px 16px}
-  .kpi .k-label{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.09em;
-    text-transform:uppercase;color:var(--ink-soft);font-weight:600}
-  .kpi .k-val{font-family:'Zilla Slab',serif;font-weight:700;font-size:34px;line-height:1.05;
-    margin-top:8px;letter-spacing:-.01em}
-  .kpi .k-unit{font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Mono',monospace}
-  .kpi .k-yoy{margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600}
+  /* --- bloques de tabla --- */
+  section.tbl{margin:30px 0 0}
+  .tbl-head{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap;margin-bottom:3px}
+  .tbl-num{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--petrol);
+    border:1px solid var(--petrol);border-radius:2px;padding:2px 7px}
+  h2{font-family:'Zilla Slab',serif;font-weight:600;font-size:22px;margin:0;letter-spacing:-.01em}
+  .tbl-note{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);margin:2px 0 10px;max-width:95ch}
+
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:3px;background:var(--panel);box-shadow:var(--shadow)}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;white-space:nowrap}
+  thead th{background:var(--head);color:#eaf2f0;font-family:'IBM Plex Mono',monospace;font-weight:600;
+    font-size:11.5px;letter-spacing:.03em;text-transform:uppercase;padding:9px 11px;text-align:right;position:sticky;top:0}
+  thead th:first-child{text-align:left}
+  tbody td{padding:8px 11px;text-align:right;border-bottom:1px solid var(--line-soft);
+    font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
+  tbody td:first-child{text-align:left;font-family:'Inter',sans-serif;font-weight:500}
+  tbody tr:nth-child(even){background:var(--zebra)}
+  /* primera columna fija */
+  thead th:first-child,tbody td:first-child{position:sticky;left:0;z-index:1}
+  thead th:first-child{z-index:3}
+  tbody td:first-child{background:var(--panel)}
+  tbody tr:nth-child(even) td:first-child{background:var(--zebra)}
+  tr.sep td{border-top:2px solid var(--ink)}
+  tr.strong td{font-weight:600}
+  td.hl{color:var(--ink);font-weight:600}
+  th.hl-col,td.hl-col{background:rgba(15,80,96,.06)}
   .up{color:var(--pos)} .down{color:var(--neg)} .flat{color:var(--neutral)}
+  td.dim{color:var(--ink-soft)}
 
-  /* ---------- Section shell ---------- */
-  section.block{background:var(--panel);border:1px solid var(--line);border-radius:2px;
-    margin:20px 0;box-shadow:var(--shadow);overflow:hidden}
-  .block-head{display:flex;gap:14px;align-items:baseline;padding:20px 22px 0;flex-wrap:wrap}
-  .block-num{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;color:var(--petrol);
-    border:1px solid var(--petrol);border-radius:2px;padding:2px 7px;align-self:center}
-  h2{font-family:'Zilla Slab',serif;font-weight:600;font-size:24px;margin:0;letter-spacing:-.01em}
-  .block-desc{padding:2px 22px 0;font-family:'IBM Plex Mono',monospace;font-size:12.5px;
-    color:var(--ink-soft)}
-  .block-body{padding:16px 22px 24px}
-  .lede{font-size:15.5px;line-height:1.6;max-width:70ch}
-  .lede .big{font-family:'Zilla Slab',serif;font-weight:700;font-size:19px}
-  .grid2{display:grid;grid-template-columns:1.1fr .9fr;gap:26px;align-items:start}
-  @media(max-width:760px){.grid2{grid-template-columns:1fr}.kpis{grid-template-columns:repeat(2,1fr)}}
-
-  /* ---------- Tables ---------- */
-  table{width:100%;border-collapse:collapse;font-size:14px;margin-top:6px}
-  th,td{text-align:right;padding:9px 10px;border-bottom:1px solid var(--line-soft)}
-  th:first-child,td:first-child{text-align:left}
-  thead th{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;
-    text-transform:uppercase;color:var(--ink-soft);font-weight:600;border-bottom:1px solid var(--line)}
-  tbody td{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums}
-  tbody td:first-child{font-family:'Inter',sans-serif}
-  tr.total td{font-weight:600;border-top:2px solid var(--ink);border-bottom:none}
-  .win{font-size:12px;color:var(--ink-soft)}
-
-  /* ---------- Pipeline signature ---------- */
-  .pipe{margin:26px 0;border:1px solid var(--line);background:var(--panel);border-radius:2px;
-    padding:22px 22px 12px;box-shadow:var(--shadow)}
-  .pipe h3{font-family:'Zilla Slab',serif;font-weight:600;font-size:20px;margin:0 0 2px}
-  .pipe .p-sub{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--ink-soft);margin-bottom:18px}
-  .track{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-  .track:before{content:"";position:absolute;left:0;right:0;top:-9px;height:2px;background:var(--line)}
-  .seg{position:relative;padding-top:20px}
-  .seg:before{content:"";position:absolute;top:-13px;left:0;width:10px;height:10px;border-radius:50%;
-    background:var(--petrol);border:2px solid var(--panel)}
-  .seg .horizon{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--petrol);
-    font-weight:600;letter-spacing:.04em}
-  .seg .s-metric{font-size:12.5px;color:var(--ink-soft);margin-top:3px}
-  .seg .s-val{font-family:'Zilla Slab',serif;font-weight:700;font-size:22px;margin-top:4px;line-height:1.1}
-  .seg .s-yoy{font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:600;margin-top:2px}
-  @media(max-width:760px){.track{grid-template-columns:repeat(2,1fr);gap:22px 12px}}
-
-  /* charts */
-  svg.chart{width:100%;height:auto;display:block}
-  .cap{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-top:6px}
-
-  /* footer */
-  footer.sources{margin-top:34px;padding-top:20px;border-top:2px solid var(--ink);
+  footer.sources{margin-top:40px;padding-top:20px;border-top:2px solid var(--ink);
     font-size:13px;color:var(--ink-soft);line-height:1.7}
-  footer .src-h{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;
-    text-transform:uppercase;color:var(--ink);font-weight:600;margin-bottom:6px}
+  footer .src-h{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--ink);font-weight:600;margin-bottom:6px}
   .disc{font-size:12px;color:var(--ink-soft);font-style:italic;margin-top:10px}
   :focus-visible{outline:2px solid var(--petrol);outline-offset:2px}
-  @media (prefers-reduced-motion: reduce){.skeleton{animation:none}}
+  .legend{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--ink-soft);margin-top:6px}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header class="masthead">
-    <div class="eyebrow">
-      <span class="dot" id="live-dot"></span>
-      <span>USDA · NASS QuickStats · Quarterly Hogs and Pigs</span>
-    </div>
+    <div class="eyebrow"><span class="dot" id="live-dot"></span>
+      <span>USDA · NASS QuickStats · Quarterly Hogs and Pigs</span></div>
     <h1>Informe Hogs and Pigs</h1>
-    <p class="sub" id="hero-sub"><span class="skeleton">Cargando inventario de referencia desde la API de USDA NASS…</span></p>
+    <p class="summary" id="summary"><span class="skeleton">Cargando datos desde la API de USDA NASS…</span></p>
     <div class="meta-row">
-      <span class="bias-chip"><span class="bar" id="bias-bar"></span><span id="bias-text" class="skeleton">Calculando sesgo de oferta…</span></span>
       <span class="stamp" id="stamp">—</span>
       <button class="refresh-btn" id="refreshBtn" type="button">Actualizar datos</button>
     </div>
   </header>
 
-  <div id="fatal">
-    No se pudieron cargar los datos en vivo desde USDA NASS.
-    Revisa la conexión del proxy en <a href="/diagnostico.html">/diagnostico.html</a>,
-    donde cada consulta se prueba por separado y muestra el error exacto.
-    <div class="stamp" id="fatal-detail" style="margin-top:8px"></div>
-  </div>
+  <div id="fatal">No se pudieron cargar los datos en vivo desde USDA NASS.
+    Revisa el proxy en <a href="/diagnostico.html">/diagnostico.html</a>.
+    <div class="stamp" id="fatal-detail" style="margin-top:8px"></div></div>
 
-  <!-- KPI strip -->
-  <div class="kpis" id="kpis">
-    <div class="kpi"><div class="k-label">Rebaño reproductor</div>
-      <div class="k-val skeleton" id="kpi-breed-v">·····</div>
-      <div class="k-unit" id="kpi-breed-u">M cabezas</div>
-      <div class="k-yoy skeleton" id="kpi-breed-y">····</div></div>
-    <div class="kpi"><div class="k-label">Total cerdos</div>
-      <div class="k-val skeleton" id="kpi-all-v">·····</div>
-      <div class="k-unit" id="kpi-all-u">M cabezas</div>
-      <div class="k-yoy skeleton" id="kpi-all-y">····</div></div>
-    <div class="kpi"><div class="k-label">Cerdos de mercado</div>
-      <div class="k-val skeleton" id="kpi-mkt-v">·····</div>
-      <div class="k-unit" id="kpi-mkt-u">M cabezas</div>
-      <div class="k-yoy skeleton" id="kpi-mkt-y">····</div></div>
-    <div class="kpi"><div class="k-label">Lean Hogs · HE=F</div>
-      <div class="k-val skeleton" id="kpi-he-v">·····</div>
-      <div class="k-unit" id="kpi-he-u">USD/cwt</div>
-      <div class="k-yoy skeleton" id="kpi-he-y">····</div></div>
-  </div>
-
-  <!-- Pipeline signature -->
-  <div class="pipe">
-    <h3>La cadena de oferta futura</h3>
-    <div class="p-sub" id="pipe-sub">Cada eslabón adelanta la oferta de carne para un horizonte distinto</div>
-    <div class="track">
-      <div class="seg"><div class="horizon">0–6 MESES</div>
-        <div class="s-metric">Cerdos 180 lb y más</div>
-        <div class="s-val skeleton" id="pipe-1v">···</div>
-        <div class="s-yoy skeleton" id="pipe-1y">···</div></div>
-      <div class="seg"><div class="horizon">3–6 MESES</div>
-        <div class="s-metric">Pig crop reciente</div>
-        <div class="s-val skeleton" id="pipe-2v">···</div>
-        <div class="s-yoy skeleton" id="pipe-2y">···</div></div>
-      <div class="seg"><div class="horizon">6–12 MESES</div>
-        <div class="s-metric">Intenciones de parición</div>
-        <div class="s-val skeleton" id="pipe-3v">···</div>
-        <div class="s-yoy skeleton" id="pipe-3y">···</div></div>
-      <div class="seg"><div class="horizon">12–24 MESES</div>
-        <div class="s-metric">Rebaño reproductor</div>
-        <div class="s-val skeleton" id="pipe-4v">···</div>
-        <div class="s-yoy skeleton" id="pipe-4y">···</div></div>
-    </div>
-  </div>
-
-  <!-- 1. Breeding -->
-  <section class="block">
-    <div class="block-head"><span class="block-num">01</span><h2>Rebaño reproductor</h2></div>
-    <div class="block-desc" id="s1-desc">—</div>
-    <div class="block-body grid2">
-      <div>
-        <p class="lede" id="s1-lede"><span class="skeleton">Calculando el rebaño reproductor y su variación interanual…</span></p>
-      </div>
-      <div>
-        <svg class="chart" id="s1-chart" viewBox="0 0 420 170" role="img" aria-label="Serie histórica del rebaño reproductor"></svg>
-        <div class="cap" id="s1-cap">—</div>
-      </div>
-    </div>
+  <!-- 1 · Inventario por clase y peso, últimos trimestres -->
+  <section class="tbl">
+    <div class="tbl-head"><span class="tbl-num">01</span><h2>Inventario por clase y grupo de peso — últimos trimestres</h2></div>
+    <div class="tbl-note" id="n1">Millones de cabezas. Δ trim. = vs. trimestre anterior · Δ i.a. = vs. mismo trimestre del año anterior.</div>
+    <div class="scroll"><table id="t1"><thead id="t1h"></thead><tbody id="t1b">
+      <tr><td class="skeleton" colspan="10">Cargando inventario…</td></tr></tbody></table></div>
   </section>
 
-  <!-- 2. Market hogs by weight -->
-  <section class="block">
-    <div class="block-head"><span class="block-num">02</span><h2>Cerdos de mercado por peso</h2></div>
-    <div class="block-desc" id="s2-desc">—</div>
-    <div class="block-body grid2">
-      <div>
-        <table id="s2-table">
-          <thead><tr><th>Categoría de peso</th><th>Cabezas</th><th>Interanual</th><th>Ventana</th></tr></thead>
-          <tbody id="s2-tbody">
-            <tr><td class="skeleton" colspan="4">Cargando desglose por peso…</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <div>
-        <svg class="chart" id="s2-chart" viewBox="0 0 420 200" role="img" aria-label="Inventario por categoría de peso"></svg>
-        <p class="lede" id="s2-lede" style="margin-top:12px;font-size:14.5px"></p>
-      </div>
-    </div>
+  <!-- 2 · Mismo trimestre, comparación plurianual -->
+  <section class="tbl">
+    <div class="tbl-head"><span class="tbl-num">02</span><h2>Mismo trimestre, año contra año</h2></div>
+    <div class="tbl-note" id="n2">Millones de cabezas para el trimestre de referencia actual, en años sucesivos.</div>
+    <div class="scroll"><table id="t2"><thead id="t2h"></thead><tbody id="t2b">
+      <tr><td class="skeleton" colspan="10">Cargando comparación plurianual…</td></tr></tbody></table></div>
   </section>
 
-  <!-- 3. Pig crop -->
-  <section class="block">
-    <div class="block-head"><span class="block-num">03</span><h2>Cosecha de lechones (pig crop)</h2></div>
-    <div class="block-desc" id="s3-desc">—</div>
-    <div class="block-body grid2">
-      <div><p class="lede" id="s3-lede"><span class="skeleton">Calculando pig crop, sows farrowing y pigs per litter…</span></p></div>
-      <div>
-        <table id="s3-table">
-          <thead><tr><th>Componente</th><th>Valor</th><th>Interanual</th></tr></thead>
-          <tbody id="s3-tbody"><tr><td class="skeleton" colspan="3">Cargando…</td></tr></tbody>
-        </table>
-      </div>
-    </div>
+  <!-- 3 · Sows farrowing / pig crop / pigs per litter -->
+  <section class="tbl">
+    <div class="tbl-head"><span class="tbl-num">03</span><h2>Cerdas paridas, cosecha de lechones y camada — por trimestre</h2></div>
+    <div class="tbl-note" id="n3">Cerdas paridas y pig crop en millones; camada en lechones por cerda. Δ i.a. frente al mismo trimestre del año previo.</div>
+    <div class="scroll"><table id="t3"><thead id="t3h"></thead><tbody id="t3b">
+      <tr><td class="skeleton" colspan="8">Cargando flujos…</td></tr></tbody></table></div>
   </section>
 
-  <!-- 4. Intentions -->
-  <section class="block">
-    <div class="block-head"><span class="block-num">04</span><h2>Intenciones de parición</h2></div>
-    <div class="block-desc" id="s4-desc">El dato más predictivo — oferta a 6–12 meses vista</div>
-    <div class="block-body grid2">
-      <div>
-        <table id="s4-table">
-          <thead><tr><th>Trimestre de parición</th><th>Cerdas (M)</th><th>vs. año previo</th><th>Sacrificio esperado</th></tr></thead>
-          <tbody id="s4-tbody"><tr><td class="skeleton" colspan="4">Cargando intenciones…</td></tr></tbody>
-        </table>
-      </div>
-      <div><p class="lede" id="s4-lede" style="font-size:14.5px"></p></div>
-    </div>
+  <!-- 4 · Intenciones de parición -->
+  <section class="tbl">
+    <div class="tbl-head"><span class="tbl-num">04</span><h2>Intenciones de parición — próximos trimestres</h2></div>
+    <div class="tbl-note" id="n4">Cerdas que los productores prevén hacer parir. Comparadas con lo realmente parido 1 y 2 años antes. Determina la oferta ~6 meses después.</div>
+    <div class="scroll"><table id="t4"><thead id="t4h"></thead><tbody id="t4b">
+      <tr><td class="skeleton" colspan="6">Cargando intenciones…</td></tr></tbody></table></div>
   </section>
 
-  <!-- 5. Futures -->
-  <section class="block">
-    <div class="block-head"><span class="block-num">05</span><h2>Futuros Lean Hogs (CME)</h2></div>
-    <div class="block-desc" id="s5-desc">Cotización HE=F · Yahoo Finance</div>
-    <div class="block-body">
-      <svg class="chart" id="s5-chart" viewBox="0 0 900 240" role="img" aria-label="Precio de los futuros Lean Hogs, último año"></svg>
-      <div class="cap" id="s5-cap">—</div>
-      <p class="lede" id="s5-lede" style="margin-top:10px;font-size:14.5px"></p>
-    </div>
+  <!-- 5 · Pig crop histórico anual por trimestre (pivote) -->
+  <section class="tbl">
+    <div class="tbl-head"><span class="tbl-num">05</span><h2>Pig crop por trimestre y año — matriz histórica</h2></div>
+    <div class="tbl-note" id="n5">Millones de lechones. Filas = trimestre de nacimiento; columnas = año. Permite leer el ciclo estacional y la tendencia plurianual.</div>
+    <div class="scroll"><table id="t5"><thead id="t5h"></thead><tbody id="t5b">
+      <tr><td class="skeleton" colspan="10">Cargando matriz…</td></tr></tbody></table></div>
+  </section>
+
+  <!-- 6 · Camada (pigs per litter) histórico anual por trimestre -->
+  <section class="tbl">
+    <div class="tbl-head"><span class="tbl-num">06</span><h2>Lechones por camada — matriz histórica</h2></div>
+    <div class="tbl-note" id="n6">Lechones por cerda. El máximo de cada trimestre aparece resaltado.</div>
+    <div class="scroll"><table id="t6"><thead id="t6h"></thead><tbody id="t6b">
+      <tr><td class="skeleton" colspan="10">Cargando matriz…</td></tr></tbody></table></div>
+  </section>
+
+  <!-- 7 · Futuros Lean Hogs (tabla) -->
+  <section class="tbl">
+    <div class="tbl-head"><span class="tbl-num">07</span><h2>Futuros Lean Hogs (CME · HE=F)</h2></div>
+    <div class="tbl-note" id="n7">USD por cwt · fuente Yahoo Finance. Referencias frente al último cierre disponible.</div>
+    <div class="scroll"><table id="t7"><thead id="t7h"></thead><tbody id="t7b">
+      <tr><td class="skeleton" colspan="4">Cargando cotización…</td></tr></tbody></table></div>
   </section>
 
   <footer class="sources">
     <div class="src-h">Fuentes</div>
     <div id="src-body">—</div>
-    <p class="disc" id="disc">El “sesgo de oferta” y las lecturas de mercado son interpretación del propio informe, no asesoramiento de inversión. Los futuros conllevan riesgo.</p>
+    <p class="disc">Los valores de mercado son informativos, no asesoramiento de inversión.</p>
   </footer>
-
 </div>
 
 <script>
-/* ============================================================
-   Informe Hogs and Pigs — pipeline de datos en vivo
-   Nada de cifras estáticas: todo se rellena tras las llamadas.
-   ============================================================ */
-const NASS_KEY = 'EB7D3956-F3E0-3023-A6E7-602F604D4B67';
-const MONTHS = {JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
-const MONTH_ES = ['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const NASS_KEY='EB7D3956-F3E0-3023-A6E7-602F604D4B67';
+const MONTHS={JAN:1,FEB:2,MAR:3,APR:4,MAY:5,JUN:6,JUL:7,AUG:8,SEP:9,OCT:10,NOV:11,DEC:12};
+const M3={3:'mar',6:'jun',9:'sep',12:'dic'};
+const MES_ES=['','enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 
 async function nass(params){
-  const qs = new URLSearchParams({key:NASS_KEY, format:'JSON', ...params});
-  const res = await fetch('/nass-api?' + qs.toString());
-  if(!res.ok){
-    let extra=''; try{ extra=(await res.text()).slice(0,140); }catch(e){}
-    throw new Error('HTTP '+res.status+' '+extra);
-  }
-  const json = await res.json();
-  return json.data || [];
+  const qs=new URLSearchParams({key:NASS_KEY,format:'JSON',...params});
+  const res=await fetch('/nass-api?'+qs.toString());
+  if(!res.ok){ let x=''; try{x=(await res.text()).slice(0,140);}catch(e){} throw new Error('HTTP '+res.status+' '+x); }
+  const j=await res.json(); return j.data||[];
 }
+const num=s=>{const n=Number(String(s).replace(/,/g,''));return Number.isFinite(n)?n:null;};
+function monthOf(t){t=(t||'').toUpperCase();for(const k in MONTHS){if(t.includes(k))return MONTHS[k];}return null;}
+function refMonth(ref){ref=(ref||'').toUpperCase();return ref.includes('THRU')?monthOf(ref.split('THRU')[1]):monthOf(ref);}
+function isQuarterFlow(ref){ref=(ref||'').toUpperCase();if(!ref.includes('THRU'))return false;const p=ref.split('THRU');const a=monthOf(p[0]),b=monthOf(p[1]);return a&&b?((b-a+12)%12)===2:false;}
+const fmtM=v=>v==null?'—':(v/1e6).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
+const fmtN=v=>v==null?'—':v.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
+function pct(cur,prev){if(cur==null||prev==null||prev===0)return null;return (cur-prev)/prev*100;}
+function pctCell(cur,prev){const p=pct(cur,prev);if(p==null)return '<td class="dim">—</td>';const c=p>0.05?'up':(p<-0.05?'down':'flat');const a=p>0.05?'▲':(p<-0.05?'▼':'▬');return '<td class="'+c+'">'+a+' '+(p>0?'+':'')+p.toFixed(1)+'%</td>';}
 
-/* --- helpers de parsing --- */
-const num = s => { const n = Number(String(s).replace(/,/g,'')); return Number.isFinite(n)?n:null; };
-function monthOf(token){ token=(token||'').toUpperCase(); for(const k in MONTHS){ if(token.includes(k)) return MONTHS[k]; } return null; }
-// mes de referencia: inventario (un mes) o flujo trimestral (mes final tras THRU)
-function refMonth(ref){
-  ref=(ref||'').toUpperCase();
-  if(ref.includes('THRU')){ return monthOf(ref.split('THRU')[1]); }
-  return monthOf(ref);
-}
-function refKey(rec){ const m=refMonth(rec.reference_period_desc); return m? rec._year*100+m : null; }
-// ¿es un flujo trimestral de 3 meses? (DEC THRU FEB, MAR THRU MAY, ...)
-function isQuarterFlow(ref){
-  ref=(ref||'').toUpperCase(); if(!ref.includes('THRU')) return false;
-  const parts=ref.split('THRU'); const a=monthOf(parts[0]), b=monthOf(parts[1]);
-  if(!a||!b) return false; return ((b-a+12)%12)===2;
-}
-const fmtM = v => (v/1e6).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2});
-const fmtN = v => v.toLocaleString('es-ES',{maximumFractionDigits:2});
-function yoyStr(cur,prev){
-  if(cur==null||prev==null||prev===0) return {txt:'s/ comparación', cls:'flat', pct:null};
-  const p=(cur-prev)/prev*100;
-  const cls = p>0.05?'up':(p<-0.05?'down':'flat');
-  const arrow = p>0.05?'▲':(p<-0.05?'▼':'▬');
-  return {txt:arrow+' '+(p>0?'+':'')+p.toFixed(1)+'%', cls, pct:p};
-}
-
-/* --- clasificadores por short_desc (siempre presente) --- */
-const isBreeding = r => r._sd==='HOGS, BREEDING - INVENTORY';
-const isAll      = r => r._sd==='HOGS - INVENTORY';
-const isMarketTot= r => r._sd==='HOGS, MARKET - INVENTORY';
-const isWeight   = r => r._sd.startsWith('HOGS, MARKET, MEASURED IN LBS');
-const isPigCrop  = r => r._sd.includes('PIG CROP');
-const isLitter   = r => r._sd.includes('PER LITTER');
-const isIntent   = r => r._sd.includes('INTENTIONS');
-const isFarrow   = r => r._sd.includes('FARROWING') && !isIntent(r);
-// clasifica una categoría de peso -> orden/etiqueta
-function weightClass(sd){
-  if(sd.includes('180')) return {order:4,label:'180 lb y más',win:0};
-  if(sd.includes('120')) return {order:3,label:'120–179 lb',win:1};
-  if(sd.includes('50 TO 119')||sd.includes('50-119')) return {order:2,label:'50–119 lb',win:2};
-  if(sd.includes('< 50')||sd.includes('LT 50')||sd.includes('UNDER 50')) return {order:1,label:'Menos de 50 lb',win:4};
-  return {order:0,label:sd,win:null};
-}
-
-/* --- utilidades de series --- */
-function latestAndYoY(rows, sameMonthPref){
-  // devuelve {cur, curKey, curYear, curMonth, prev} para inventario o flujo
-  const withKey = rows.map(r=>({...r,_k:refKey(r)})).filter(r=>r._k!=null && r._val!=null);
-  if(!withKey.length) return null;
-  withKey.sort((a,b)=>b._k-a._k);
-  const cur = withKey[0];
-  const prev = withKey.find(r=>r._k===cur._k-100 && refMonth(r.reference_period_desc)===refMonth(cur.reference_period_desc));
-  return {cur, prev, series:withKey};
-}
-
-/* ============================================================
-   Carga principal
-   ============================================================ */
-let AUTO_TIMER=null;
-
-async function load(){
-  clearTimeout(AUTO_TIMER);
-  document.getElementById('fatal').style.display='none';
-  try{
-    const rows = await fetchPool();
-    const D = buildModel(rows);
-    render(D);
-    // futuros: no debe tumbar el informe si falla
-    fetchLeanHogs().then(renderFutures).catch(err=>renderFuturesError(err));
-    renderStamp();
-  }catch(err){
-    showFatal(err);
-  }
-  // refresco cada 6 h (el informe es trimestral; los futuros, diarios)
-  AUTO_TIMER = setTimeout(()=>location.reload(), 6*60*60*1000);
-}
+const isWeight=sd=>sd.startsWith('HOGS, MARKET, MEASURED IN LBS');
+const INV_ITEMS=[
+  {key:'all',  label:'Total cerdos y lechones', m:sd=>sd==='HOGS - INVENTORY'},
+  {key:'breed',label:'Reproductores (breeding)', m:sd=>sd==='HOGS, BREEDING - INVENTORY'},
+  {key:'mkt',  label:'Mercado (total)', m:sd=>sd==='HOGS, MARKET - INVENTORY'},
+  {key:'w50',  label:'Mercado · menos de 50 lb', m:sd=>isWeight(sd)&&(sd.includes('< 50')||sd.includes('LT 50')||sd.includes('UNDER 50'))},
+  {key:'w119', label:'Mercado · 50–119 lb', m:sd=>isWeight(sd)&&(sd.includes('50 TO 119')||sd.includes('50-119'))},
+  {key:'w179', label:'Mercado · 120–179 lb', m:sd=>isWeight(sd)&&(sd.includes('120 TO 179')||sd.includes('120-179'))},
+  {key:'w180', label:'Mercado · 180 lb y más', m:sd=>isWeight(sd)&&sd.includes('180')},
+];
 
 async function fetchPool(){
-  // Estrategia robusta: UNA llamada amplia y clasificar por short_desc en cliente.
-  // Evita combinar parámetros que devuelven HTTP 400 y no depende de acertar statisticcat.
-  const attempts = [
-    {commodity_desc:'HOGS', agg_level_desc:'NATIONAL', source_desc:'SURVEY', domain_desc:'TOTAL', year__GE:2013},
-    {commodity_desc:'HOGS', agg_level_desc:'NATIONAL', source_desc:'SURVEY', domain_desc:'TOTAL', year__GE:2019},
+  const tries=[
+    {commodity_desc:'HOGS',agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2013},
+    {commodity_desc:'HOGS',agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2018},
   ];
-  let lastErr=null;
-  for(const p of attempts){
-    try{ const r = await nass(p); if(r && r.length) return r; }
-    catch(e){ lastErr=e; }
-  }
-  // último recurso: por statisticcat (por si el pool superó el límite de 50k)
+  let err=null;
+  for(const p of tries){try{const r=await nass(p);if(r&&r.length)return r;}catch(e){err=e;}}
   const cats=['INVENTORY','PIG CROP','FARROWINGS','PIGS SAVED PER LITTER','SOWS FARROWED'];
   let acc=[];
-  for(const c of cats){
-    try{ acc=acc.concat(await nass({commodity_desc:'HOGS',statisticcat_desc:c,agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2013})); }
-    catch(e){ lastErr=e; }
-  }
-  if(acc.length) return acc;
-  throw lastErr || new Error('Sin datos');
+  for(const c of cats){try{acc=acc.concat(await nass({commodity_desc:'HOGS',statisticcat_desc:c,agg_level_desc:'NATIONAL',source_desc:'SURVEY',domain_desc:'TOTAL',year__GE:2013}));}catch(e){err=e;}}
+  if(acc.length)return acc; throw err||new Error('Sin datos');
 }
 
 function buildModel(raw){
-  // normaliza
-  const rows = raw.map(r=>({
-    _sd:(r.short_desc||'').toUpperCase().trim(),
-    _year:parseInt(r.year,10),
-    _val:num(r.Value),
-    reference_period_desc:r.reference_period_desc,
-    unit_desc:(r.unit_desc||'').toUpperCase(),
-    domain_desc:(r.domain_desc||'').toUpperCase(),
-    load_time:r.load_time
-  })).filter(r=> r.domain_desc==='' || r.domain_desc==='TOTAL' );
+  const rows=raw.map(r=>({
+    sd:(r.short_desc||'').toUpperCase().trim(), year:parseInt(r.year,10), val:num(r.Value),
+    ref:r.reference_period_desc, unit:(r.unit_desc||'').toUpperCase(), dom:(r.domain_desc||'').toUpperCase()
+  })).filter(r=> (r.dom===''||r.dom==='TOTAL') && r.val!=null && Number.isFinite(r.year));
 
-  const pick = f => rows.filter(f);
-
-  const breeding = latestAndYoY(pick(isBreeding));
-  const allHogs  = latestAndYoY(pick(isAll));
-  const marketT  = latestAndYoY(pick(isMarketTot));
-
-  // fecha de referencia del inventario (a partir del rebaño reproductor)
-  let refDate=null;
-  if(breeding){ refDate={year:breeding.cur._year, month:refMonth(breeding.cur.reference_period_desc)}; }
-
-  // categorías de peso en la fecha de referencia
-  const weightRows = pick(isWeight).map(r=>({...r,_k:refKey(r)}));
-  const wKey = breeding ? breeding.cur._k : (weightRows.length? Math.max(...weightRows.map(r=>r._k)) : null);
-  const weights = [];
-  if(wKey){
-    const groups={};
-    weightRows.forEach(r=>{ const wc=weightClass(r._sd); if(!groups[wc.order]||r._k>groups[wc.order]._k) {} });
-    [1,2,3,4].forEach(ord=>{
-      const cur = weightRows.find(r=>weightClass(r._sd).order===ord && r._k===wKey);
-      const prev= weightRows.find(r=>weightClass(r._sd).order===ord && r._k===wKey-100);
-      if(cur){ const wc=weightClass(cur._sd); weights.push({label:wc.label,win:wc.win,cur:cur._val,prev:prev?prev._val:null}); }
-    });
-    weights.sort((a,b)=> b.cur - a.cur ? 0 : 0); // mantener orden de peso descendente
-  }
-  weights.sort((a,b)=>{
-    const o={'180 lb y más':4,'120–179 lb':3,'50–119 lb':2,'Menos de 50 lb':1};
-    return (o[b.label]||0)-(o[a.label]||0);
+  // ---- inventario: item -> Map(key=year*100+month -> val) ----
+  const invKeysSet=new Set(); const inv={};
+  INV_ITEMS.forEach(it=>{
+    const map=new Map();
+    rows.filter(r=>it.m(r.sd)).forEach(r=>{const m=refMonth(r.ref); if([3,6,9,12].includes(m)){const k=r.year*100+m; map.set(k,r.val); invKeysSet.add(k);}});
+    inv[it.key]=map;
   });
+  const invKeys=[...invKeysSet].sort((a,b)=>b-a); // desc
+  const refKey=invKeys[0]||null;
+  const refDate=refKey?{year:Math.floor(refKey/100),month:refKey%100}:null;
 
-  // pig crop, sows farrowing, litter (flujos trimestrales de 3 meses)
-  const pcRows = pick(r=>isPigCrop(r) && isQuarterFlow(r.reference_period_desc));
-  const pigCrop = latestAndYoY(pcRows);
-  let farrow=null, litter=null, flowPeriod=null, flowYear=null;
-  if(pigCrop){
-    flowPeriod = pigCrop.cur.reference_period_desc; flowYear = pigCrop.cur._year;
-    const fr = pick(r=>isFarrow(r) && r.reference_period_desc===flowPeriod);
-    const frCur = fr.find(r=>r._year===flowYear), frPrev=fr.find(r=>r._year===flowYear-1);
-    if(frCur) farrow={cur:frCur._val, prev:frPrev?frPrev._val:null};
-    const li = pick(r=>isLitter(r) && r.reference_period_desc===flowPeriod);
-    const liCur=li.find(r=>r._year===flowYear), liPrev=li.find(r=>r._year===flowYear-1);
-    if(liCur){
-      const allLi=pick(r=>isLitter(r) && r.reference_period_desc===flowPeriod).map(r=>r._val).filter(v=>v!=null);
-      const isRecord = liCur._val>=Math.max(...allLi);
-      litter={cur:liCur._val, prev:liPrev?liPrev._val:null, record:isRecord};
-    }
-  }
+  // ---- flujos: pigcrop/farrow/litter -> Map(key=year*100+endMonth -> val) ----
+  const flowKeysSet=new Set();
+  function flowMap(test){const map=new Map();rows.filter(r=>test(r.sd)&&isQuarterFlow(r.ref)).forEach(r=>{const m=refMonth(r.ref);const k=r.year*100+m;map.set(k,{v:r.val,ref:r.ref,year:r.year,month:m});flowKeysSet.add(k);});return map;}
+  const pigcrop=flowMap(sd=>sd.includes('PIG CROP'));
+  const litter =flowMap(sd=>sd.includes('PER LITTER'));
+  const farrow =flowMap(sd=>sd.includes('FARROWING')&&!sd.includes('INTENTIONS'));
+  const flowKeys=[...flowKeysSet].sort((a,b)=>b-a);
 
-  // intenciones: las dos con mayor clave temporal; YoY vs farrowings reales del mismo periodo año-1
-  const intRows = pick(r=>isIntent(r) && isQuarterFlow(r.reference_period_desc)).map(r=>({...r,_k:refKey(r)})).filter(r=>r._k!=null);
-  intRows.sort((a,b)=>b._k-a._k);
-  const seenP=new Set(); const intent=[];
-  for(const r of intRows){
-    const tag=r._k; if(seenP.has(tag))continue; seenP.add(tag);
-    // base de comparación: farrowings reales mismo periodo, año-1
-    const base = pick(x=>isFarrow(x) && x.reference_period_desc===r.reference_period_desc && x._year===r._year-1)[0];
-    intent.push({period:r.reference_period_desc, year:r._year, month:refMonth(r.reference_period_desc), cur:r._val, prev:base?base._val:null});
-    if(intent.length>=2) break;
-  }
-  intent.sort((a,b)=> (a.year*100+a.month)-(b.year*100+b.month));
+  // ---- intenciones ----
+  const intMap=new Map();
+  rows.filter(r=>r.sd.includes('INTENTIONS')&&isQuarterFlow(r.ref)).forEach(r=>{const m=refMonth(r.ref);const k=r.year*100+m;intMap.set(k,{v:r.val,ref:r.ref,year:r.year,month:m});});
+  const intKeys=[...intMap.keys()].sort((a,b)=>b-a).slice(0,2).sort((a,b)=>a-b);
 
-  // "más bajo desde": rebaño reproductor mismo mes
-  let breedLow=null;
-  if(breeding){
-    const m=refMonth(breeding.cur.reference_period_desc);
-    const same=breeding.series.filter(r=>refMonth(r.reference_period_desc)===m && r._year<breeding.cur._year);
-    const lower=same.filter(r=>r._val< breeding.cur._val).map(r=>r._year);
-    breedLow = lower.length? Math.max(...lower) : null; // año más reciente por debajo del actual
-    breeding._noLower = lower.length===0;
-  }
-
-  return {breeding,allHogs,marketT,weights,pigCrop,farrow,litter,intent,refDate,breedLow, loadTime:(raw[0]||{}).load_time};
+  return {rows,inv,invKeys,refKey,refDate,pigcrop,litter,farrow,flowKeys,intMap,intKeys};
 }
 
-/* ============================================================
-   Render
-   ============================================================ */
-function unskel(el){ el.classList.remove('skeleton'); }
-function setYoy(el, yy){ el.className='k-yoy '+yy.cls; el.textContent=yy.txt+' interanual'; unskel(el); }
+function qLabel(key){const y=Math.floor(key/100),m=key%100;const lbl=M3[m]||m;return lbl+" '"+String(y).slice(2);}
+function flowLabel(fk){const y=Math.floor(fk/100),m=fk%100;const map={2:'dic–feb',5:'mar–may',8:'jun–ago',11:'sep–nov'};return (map[m]||m)+" '"+String(y).slice(2);}
+function flowYearLabel(fk){const y=Math.floor(fk/100);return y;}
 
-function refDateText(rd){
-  if(!rd||!rd.month) return 'fecha no disponible';
-  return '1 de '+MONTH_ES[rd.month]+' de '+rd.year;
-}
-function quarterText(period){
-  if(!period) return '';
-  const p=period.toUpperCase();
-  const map={JAN:'ene',FEB:'feb',MAR:'mar',APR:'abr',MAY:'may',JUN:'jun',JUL:'jul',AUG:'ago',SEP:'sep',OCT:'oct',NOV:'nov',DEC:'dic'};
-  return p.replace('THRU','–').replace(/[A-Z]{3,}/g,m=>map[m.slice(0,3)]||m).toLowerCase();
-}
-function monthWindow(rd, offMin, offMax){
-  if(!rd||!rd.month) return '';
-  const a=((rd.month-1+offMin)%12)+1, b=((rd.month-1+offMax)%12)+1;
-  return MONTH_ES[a].slice(0,3)+'–'+MONTH_ES[b].slice(0,3);
-}
+/* ============ RENDER ============ */
+function unskel(el){el.classList.remove('skeleton');}
+function refText(rd){return rd&&rd.month?('1 de '+MES_ES[rd.month]+' de '+rd.year):'—';}
 
 function render(D){
   const rd=D.refDate;
 
-  /* Hero */
-  const hs=document.getElementById('hero-sub');
-  if(D.breeding){
-    const yy=yoyStr(D.breeding.cur._val, D.breeding.prev?D.breeding.prev._val:null);
-    hs.innerHTML = 'Inventario de EE. UU. al <b>'+refDateText(rd)+'</b>. '+
-      'Rebaño reproductor de <b>'+fmtM(D.breeding.cur._val)+' millones</b> de cabezas '+
-      '('+ (yy.pct!=null?(yy.pct>0?'+':'')+yy.pct.toFixed(1)+'% interanual':'sin comparación') +'). '+
-      'Todas las cifras se leen en vivo de la API de USDA NASS QuickStats; el desglose por peso mapea la oferta de carne mes a mes.';
-  } else { hs.textContent='Inventario no disponible en esta consulta.'; }
-  unskel(hs);
+  /* resumen dinámico */
+  const bV=D.inv.breed.get(D.refKey), bP=D.inv.breed.get(D.refKey-100);
+  const mV=D.inv.mkt.get(D.refKey);
+  const pcK=D.flowKeys[0], pc=pcK?D.pigcrop.get(pcK):null;
+  const s=document.getElementById('summary');
+  s.innerHTML='Inventario de EE. UU. al <b>'+refText(rd)+'</b>. '+
+    'Rebaño reproductor <b>'+fmtM(bV)+' M</b> de cabezas ('+(pct(bV,bP)!=null?(pct(bV,bP)>0?'+':'')+pct(bV,bP).toFixed(1)+'% i.a.':'s/c')+'), '+
+    'mercado <b>'+fmtM(mV)+' M</b>'+(pc?', pig crop '+flowLabel(pcK)+' <b>'+fmtM(pc.v)+' M</b>':'')+'. '+
+    'Todas las tablas se leen en vivo de USDA NASS QuickStats.';
+  unskel(s);
 
-  /* Sesgo de oferta (breeding + intenciones) */
-  const bar=document.getElementById('bias-bar'), bt=document.getElementById('bias-text');
-  const bYoy = D.breeding? yoyStr(D.breeding.cur._val, D.breeding.prev?D.breeding.prev._val:null).pct : null;
-  const iYoy = D.intent.length? avg(D.intent.map(i=>i.prev?((i.cur-i.prev)/i.prev*100):null))  : null;
-  let bias='Señales mixtas', col='var(--neutral)';
-  if(bYoy!=null && iYoy!=null){
-    if(bYoy<-0.1 && iYoy<-0.1){ bias='Oferta contractiva · sesgo alcista'; col='var(--pos)'; }
-    else if(bYoy>0.1 && iYoy>0.1){ bias='Oferta expansiva · sesgo bajista'; col='var(--neg)'; }
-  }
-  bar.style.background=col; bt.textContent=bias; unskel(bt);
-
-  /* KPIs */
-  fillKpi('breed', D.breeding, true);
-  fillKpi('all', D.allHogs, true);
-  fillKpi('mkt', D.marketT, true);
-
-  /* Pipeline */
-  const w180 = D.weights.find(w=>w.label==='180 lb y más');
-  fillPipe('1', w180?fmtM(w180.cur)+' M':'—', w180?yoyStr(w180.cur,w180.prev):null);
-  fillPipe('2', D.pigCrop?fmtM(D.pigCrop.cur._val)+' M':'—', D.pigCrop?yoyStr(D.pigCrop.cur._val,D.pigCrop.prev?D.pigCrop.prev._val:null):null);
-  const iAvg = D.intent.length? D.intent.reduce((s,i)=>s+i.cur,0)/D.intent.length : null;
-  const iAvgP= (D.intent.length && D.intent.every(i=>i.prev))? D.intent.reduce((s,i)=>s+i.prev,0)/D.intent.length : null;
-  fillPipe('3', iAvg?fmtM(iAvg)+' M':'—', iAvg?yoyStr(iAvg,iAvgP):null);
-  fillPipe('4', D.breeding?fmtM(D.breeding.cur._val)+' M':'—', D.breeding?yoyStr(D.breeding.cur._val,D.breeding.prev?D.breeding.prev._val:null):null);
-  document.getElementById('pipe-sub').textContent='Fotografía de la oferta al '+refDateText(rd)+' → carne en los próximos 24 meses';
-
-  /* 1. Breeding */
-  const s1=document.getElementById('s1-lede');
-  if(D.breeding){
-    const yy=yoyStr(D.breeding.cur._val, D.breeding.prev?D.breeding.prev._val:null);
-    const dir = yy.pct!=null && yy.pct<0 ? 'se contrae' : (yy.pct>0?'se expande':'se mantiene');
-    const signal = yy.pct!=null && yy.pct<0 ? 'Un rebaño que se contrae es una señal alcista de medio plazo para Lean Hogs: menos cerdas hoy significa menos carne dentro de 12–24 meses.'
-                 : (yy.pct>0? 'Un rebaño en expansión apunta a más oferta y presión bajista sobre los precios a 12–24 meses.'
-                 : 'Un rebaño estable sugiere oferta futura sin grandes cambios estructurales.');
-    let lowTxt='';
-    if(D.breeding._noLower){ lowTxt=' Es el nivel más bajo de la serie disponible para este trimestre.'; }
-    else if(D.breedLow){ lowTxt=' Es el más bajo para un 1 de '+MONTH_ES[rd.month]+' desde '+D.breedLow+'.'; }
-    s1.innerHTML='El rebaño reproductor es la variable más estructural del informe. '+
-      'Al '+refDateText(rd)+' hay <span class="big">'+fmtM(D.breeding.cur._val)+' millones</span> de cerdas reproductoras, '+
-      '<b class="'+yy.cls+'">'+ (yy.pct!=null?(yy.pct>0?'+':'')+yy.pct.toFixed(1)+'%':'s/comp.') +'</b> interanual — el censo '+dir+'.'+lowTxt+' '+signal;
-    lineChart('s1-chart', sameMonthSeries(D.breeding.series, refMonth(D.breeding.cur.reference_period_desc)), 'M cabezas');
-    document.getElementById('s1-cap').textContent='Rebaño reproductor · 1 de '+MONTH_ES[rd.month]+', serie histórica (millones de cabezas)';
-    document.getElementById('s1-desc').textContent='Cerdas reproductoras · oferta a 12–24 meses';
-  } else { s1.textContent='No se obtuvo el rebaño reproductor en esta consulta.'; }
-  unskel(s1);
-
-  /* 2. Weights */
-  const tb=document.getElementById('s2-tbody'); tb.innerHTML='';
-  const winTxt=(w)=>{
-    if(w.win===0) return 'Próximas semanas ('+monthWindow(rd,0,1)+')';
-    if(w.win===1) return '+1–2 meses ('+monthWindow(rd,1,2)+')';
-    if(w.win===2) return '+2–3 meses ('+monthWindow(rd,2,3)+')';
-    if(w.win===4) return '+4–5 meses ('+monthWindow(rd,4,5)+')';
-    return '—';
-  };
-  let mktTotalCur=D.marketT?D.marketT.cur._val:null, mktTotalPrev=D.marketT&&D.marketT.prev?D.marketT.prev._val:null;
-  D.weights.forEach(w=>{
-    const yy=yoyStr(w.cur,w.prev);
-    tb.insertAdjacentHTML('beforeend',
-      '<tr><td>'+w.label+'</td><td>'+fmtM(w.cur)+' M</td>'+
-      '<td class="'+yy.cls+'">'+yy.txt+'</td><td class="win">'+winTxt(w)+'</td></tr>');
+  /* ---- Tabla 1: inventario últimos 8 trim (asc) + Δtrim + Δi.a. ---- */
+  const cols=D.invKeys.slice(0,8).reverse(); // asc, más antiguo→reciente
+  const last=cols[cols.length-1];
+  let h1='<tr><th>Concepto (M cabezas)</th>'+cols.map((k,i)=>'<th class="'+(i===cols.length-1?'hl-col':'')+'">'+qLabel(k)+'</th>').join('')+'<th>Δ trim.</th><th>Δ i.a.</th></tr>';
+  document.getElementById('t1h').innerHTML=h1;
+  let b1='';
+  INV_ITEMS.forEach((it,idx)=>{
+    const map=D.inv[it.key];
+    const cur=map.get(last), prevQ=map.get(cols[cols.length-2]), prevY=map.get(last-100);
+    const strong = it.key==='all'||it.key==='breed'||it.key==='mkt';
+    b1+='<tr class="'+(strong?'strong':'')+(it.key==='w50'?' sep':'')+'"><td>'+it.label+'</td>'+
+      cols.map((k,i)=>'<td class="'+(i===cols.length-1?'hl hl-col':'')+'">'+fmtM(map.get(k))+'</td>').join('')+
+      pctCell(cur,prevQ)+pctCell(cur,prevY)+'</tr>';
   });
-  if(D.marketT){
-    const yy=yoyStr(mktTotalCur,mktTotalPrev);
-    tb.insertAdjacentHTML('beforeend',
-      '<tr class="total"><td>Total mercado</td><td>'+fmtM(mktTotalCur)+' M</td><td class="'+yy.cls+'">'+yy.txt+'</td><td class="win">—</td></tr>');
-  }
-  barChart('s2-chart', D.weights.map(w=>({label:w.label.replace(' lb y más','+').replace(' lb',''),cur:w.cur,prev:w.prev})));
-  const heavy=D.weights.find(w=>w.win===0), light=D.weights.find(w=>w.win===4);
-  if(heavy&&light){
-    const hy=yoyStr(heavy.cur,heavy.prev).pct, ly=yoyStr(light.cur,light.prev).pct;
-    let msg='';
-    if(hy!=null&&ly!=null){
-      if(hy>ly) msg='Los más pesados suben más que los ligeros: presión de oferta a corto plazo, alivio más adelante en el año.';
-      else if(ly>hy) msg='Los más ligeros crecen más que los pesados: la oferta se aprieta ahora pero se ensancha en los próximos meses.';
-      else msg='El crecimiento es parejo entre categorías: oferta futura sin sesgos marcados por peso.';
-    }
-    document.getElementById('s2-lede').innerHTML='Cada categoría es un mapa temporal de la oferta. Pesados <b class="'+(hy<0?'down':'up')+'">'+
-      (hy!=null?(hy>0?'+':'')+hy.toFixed(1)+'%':'—')+'</b>, ligeros <b class="'+(ly<0?'down':'up')+'">'+
-      (ly!=null?(ly>0?'+':'')+ly.toFixed(1)+'%':'—')+'</b>. '+msg;
-  }
-  document.getElementById('s2-desc').textContent='Inventario por peso al '+refDateText(rd)+' · oferta a 0–6 meses';
+  document.getElementById('t1b').innerHTML=b1;
+  document.getElementById('n1').textContent='Millones de cabezas. Columna resaltada = último dato ('+refText(rd)+'). Δ trim. = vs. trimestre anterior · Δ i.a. = vs. mismo trimestre del año anterior.';
 
-  /* 3. Pig crop */
-  const s3=document.getElementById('s3-lede'), s3t=document.getElementById('s3-tbody'); s3t.innerHTML='';
-  if(D.pigCrop){
-    const pcy=yoyStr(D.pigCrop.cur._val,D.pigCrop.prev?D.pigCrop.prev._val:null);
-    const per=quarterText(D.pigCrop.cur.reference_period_desc)+' '+D.pigCrop.cur._year;
-    s3t.insertAdjacentHTML('beforeend','<tr><td>Pig crop (lechones)</td><td>'+fmtM(D.pigCrop.cur._val)+' M</td><td class="'+pcy.cls+'">'+pcy.txt+'</td></tr>');
-    let farStr='', litStr='';
-    if(D.farrow){ const fy=yoyStr(D.farrow.cur,D.farrow.prev); farStr=fmtM(D.farrow.cur)+' M · '+fy.txt;
-      s3t.insertAdjacentHTML('beforeend','<tr><td>Sows farrowing (cerdas paridas)</td><td>'+fmtM(D.farrow.cur)+' M</td><td class="'+fy.cls+'">'+fy.txt+'</td></tr>'); }
-    if(D.litter){ const ly=yoyStr(D.litter.cur,D.litter.prev);
-      s3t.insertAdjacentHTML('beforeend','<tr><td>Pigs per litter '+(D.litter.record?'· récord':'')+'</td><td>'+fmtN(D.litter.cur)+'</td><td class="'+ly.cls+'">'+ly.txt+'</td></tr>'); }
-    let prod = (D.farrow && D.litter && D.farrow.prev)
-      ? (yoyStr(D.farrow.cur,D.farrow.prev).pct<0 && yoyStr(D.pigCrop.cur._val,D.pigCrop.prev._val).pct>=0
-          ? 'Aunque parieron menos cerdas, la productividad por camada'+(D.litter.record?' —en récord histórico para el periodo—':'')+' compensa: un rebaño más pequeño produce más lechones porque cada camada es mayor.'
-          : 'La cosecha de lechones sigue el ritmo de las cerdas paridas y la productividad por camada'+(D.litter&&D.litter.record?', esta última en récord histórico para el periodo.':'.'))
-      : '';
-    s3.innerHTML='En '+per+' nacieron <span class="big">'+fmtM(D.pigCrop.cur._val)+' millones</span> de lechones, '+
-      '<b class="'+pcy.cls+'">'+(pcy.pct!=null?(pcy.pct>0?'+':'')+pcy.pct.toFixed(1)+'%':'s/comp.')+'</b> interanual. '+prod;
-    document.getElementById('s3-desc').textContent='Lechones nacidos en '+per+' · oferta a 3–6 meses';
-  } else { s3.textContent='No se obtuvo el pig crop en esta consulta.'; }
-  unskel(s3);
+  /* ---- Tabla 2: mismo trimestre, por año (últimos 8) ---- */
+  const m=rd?rd.month:3;
+  const yrKeys=D.invKeys.filter(k=>k%100===m).sort((a,b)=>a-b).slice(-8);
+  let h2='<tr><th>Concepto (M cabezas)</th>'+yrKeys.map((k,i)=>'<th class="'+(i===yrKeys.length-1?'hl-col':'')+'">'+Math.floor(k/100)+'</th>').join('')+'<th>Δ i.a.</th></tr>';
+  document.getElementById('t2h').innerHTML=h2;
+  let b2='';
+  INV_ITEMS.forEach(it=>{
+    const map=D.inv[it.key];const lastK=yrKeys[yrKeys.length-1];
+    const strong=it.key==='all'||it.key==='breed'||it.key==='mkt';
+    b2+='<tr class="'+(strong?'strong':'')+(it.key==='w50'?' sep':'')+'"><td>'+it.label+'</td>'+
+      yrKeys.map((k,i)=>'<td class="'+(i===yrKeys.length-1?'hl hl-col':'')+'">'+fmtM(map.get(k))+'</td>').join('')+
+      pctCell(map.get(lastK),map.get(lastK-100))+'</tr>';
+  });
+  document.getElementById('t2b').innerHTML=b2;
+  document.getElementById('n2').textContent='Millones de cabezas al 1 de '+MES_ES[m]+' de cada año. Última columna resaltada = año en curso.';
 
-  /* 4. Intentions */
-  const s4t=document.getElementById('s4-tbody'), s4=document.getElementById('s4-lede'); s4t.innerHTML='';
-  if(D.intent.length){
-    D.intent.forEach(i=>{
-      const yy=yoyStr(i.cur,i.prev);
-      // sacrificio ~6 meses después del fin del trimestre de parición
-      const slaughter = i.month? MONTH_ES[((i.month+5)%12)+1].slice(0,3)+'–'+MONTH_ES[((i.month+7)%12)+1].slice(0,3) : '—';
-      s4t.insertAdjacentHTML('beforeend',
-        '<tr><td>'+quarterText(i.period)+' '+i.year+'</td><td>'+fmtM(i.cur)+'</td>'+
-        '<td class="'+yy.cls+'">'+yy.txt+'</td><td class="win">'+slaughter+' '+(i.year+ (i.month>6?1:0))+'</td></tr>');
-    });
-    const last=D.intent[D.intent.length-1], ly=yoyStr(last.cur,last.prev);
-    s4.innerHTML='Aquí está el dato más predictivo del informe: los productores declaran cuántas cerdas harán parir en los próximos dos trimestres, y eso fija la oferta de carne <b>6 meses después</b>. '+
-      'La intención para '+quarterText(last.period)+' '+last.year+' es de <span class="big">'+fmtM(last.cur)+' M</span> cerdas '+
-      '(<b class="'+ly.cls+'">'+(ly.pct!=null?(ly.pct>0?'+':'')+ly.pct.toFixed(1)+'%':'s/comp.')+'</b> vs. lo parido un año antes). '+
-      (ly.pct!=null && ly.pct<0 ? 'La caída anticipa una oferta más apretada al filo de ese horizonte — el motor de los futuros Lean Hogs de contratos lejanos.'
-        : (ly.pct>0? 'El aumento apunta a más oferta y presión bajista en los contratos lejanos.' : 'Sin cambios relevantes en la oferta prevista.'));
-  } else { s4.textContent='No se obtuvieron intenciones de parición en esta consulta.'; }
-  unskel(s4);
+  /* ---- Tabla 3: flujos por trimestre (últimos 10) ---- */
+  const fcols=D.flowKeys.slice(0,10);
+  document.getElementById('t3h').innerHTML='<tr><th>Trimestre</th><th>Cerdas paridas (M)</th><th>Δ i.a.</th><th>Pig crop (M)</th><th>Δ i.a.</th><th>Lechones/camada</th><th>Δ i.a.</th></tr>';
+  let b3='';
+  fcols.forEach(fk=>{
+    const fa=D.farrow.get(fk), pc=D.pigcrop.get(fk), li=D.litter.get(fk);
+    const faP=D.farrow.get(fk-100), pcP=D.pigcrop.get(fk-100), liP=D.litter.get(fk-100);
+    b3+='<tr><td>'+flowLabel(fk)+'</td>'+
+      '<td>'+fmtM(fa?fa.v:null)+'</td>'+pctCell(fa?fa.v:null,faP?faP.v:null)+
+      '<td class="hl">'+fmtM(pc?pc.v:null)+'</td>'+pctCell(pc?pc.v:null,pcP?pcP.v:null)+
+      '<td>'+fmtN(li?li.v:null)+'</td>'+pctCell(li?li.v:null,liP?liP.v:null)+'</tr>';
+  });
+  document.getElementById('t3b').innerHTML=b3||'<tr><td colspan="7" class="dim">Sin datos de flujos.</td></tr>';
 
-  /* Fuentes */
-  const acc=new Date().toLocaleString('es-ES');
+  /* ---- Tabla 4: intenciones ---- */
+  document.getElementById('t4h').innerHTML='<tr><th>Trimestre de parición</th><th>Intención (M)</th><th>vs. real año −1</th><th>vs. real año −2</th><th>Sacrificio ~6 m después</th></tr>';
+  let b4='';
+  D.intKeys.forEach(k=>{
+    const it=D.intMap.get(k); if(!it)return;
+    const a1=D.farrow.get(k-100), a2=D.farrow.get(k-200);
+    const slM=((it.month+5)%12)+1, slM2=((it.month+7)%12)+1;
+    const slaughter=MES_ES[slM].slice(0,3)+'–'+MES_ES[slM2].slice(0,3)+" '"+String(it.year+(it.month>6?1:0)).slice(2);
+    b4+='<tr class="strong"><td>'+flowLabel(k)+'</td><td class="hl">'+fmtM(it.v)+'</td>'+
+      pctCell(it.v,a1?a1.v:null)+pctCell(it.v,a2?a2.v:null)+'<td class="dim">'+slaughter+'</td></tr>';
+  });
+  document.getElementById('t4b').innerHTML=b4||'<tr><td colspan="5" class="dim">Sin intenciones disponibles.</td></tr>';
+
+  /* ---- Tabla 5: matriz pig crop (trim x año) ---- */
+  matrix('t5',D.pigcrop,D.flowKeys,fmtM,false);
+  /* ---- Tabla 6: matriz camada, resaltar máximo por trimestre ---- */
+  matrix('t6',D.litter,D.flowKeys,fmtN,true);
+
+  /* fuentes */
   document.getElementById('src-body').innerHTML=
-    '<b>Inventarios, pig crop, farrowings e intenciones:</b> USDA · National Agricultural Statistics Service (NASS), Quarterly Hogs and Pigs, vía QuickStats API.<br>'+
-    'Inventario de referencia: '+refDateText(rd)+'.'+(D.pigCrop?' Pig crop: '+quarterText(D.pigCrop.cur.reference_period_desc)+' '+D.pigCrop.cur._year+'.':'')+'<br>'+
+    '<b>Inventarios, pig crop, farrowings e intenciones:</b> USDA · NASS, Quarterly Hogs and Pigs, vía QuickStats API. '+
+    'Referencia de inventario: '+refText(rd)+'.'+(pcK?' Último pig crop: '+flowLabel(pcK)+'.':'')+'<br>'+
     '<b>Futuros Lean Hogs (HE=F):</b> Yahoo Finance.<br>'+
-    'Datos consultados en vivo: '+acc+'. Refresco automático cada 6 h.';
+    'Consultado en vivo: '+new Date().toLocaleString('es-ES')+' · refresco automático cada 6 h.';
 }
 
-function avg(arr){ const v=arr.filter(x=>x!=null); return v.length? v.reduce((a,b)=>a+b,0)/v.length : null; }
-function sameMonthSeries(series,m){
-  return series.filter(r=>refMonth(r.reference_period_desc)===m && r._val!=null)
-    .map(r=>({x:r._year,y:r._val})).sort((a,b)=>a.x-b.x);
-}
-
-function fillKpi(id, obj, millions){
-  const v=document.getElementById('kpi-'+id+'-v'), y=document.getElementById('kpi-'+id+'-y');
-  if(!obj){ v.textContent='—'; unskel(v); y.textContent='sin dato'; y.className='k-yoy flat'; unskel(y); return; }
-  v.textContent = millions? fmtM(obj.cur._val) : fmtN(obj.cur._val); unskel(v);
-  document.getElementById('kpi-'+id+'-u').textContent='M cabezas';
-  setYoy(y, yoyStr(obj.cur._val, obj.prev?obj.prev._val:null));
-}
-function fillPipe(n, valTxt, yy){
-  const v=document.getElementById('pipe-'+n+'v'), y=document.getElementById('pipe-'+n+'y');
-  v.textContent=valTxt; unskel(v);
-  if(yy){ y.textContent=yy.txt; y.className='s-yoy '+yy.cls; } else { y.textContent='—'; y.className='s-yoy flat'; }
-  unskel(y);
-}
-
-/* ---- Charts (SVG a mano, sin dependencias) ---- */
-function lineChart(id, pts, unit){
-  const svg=document.getElementById(id); if(!pts.length){ svg.innerHTML=''; return; }
-  const W=420,H=170,P=34;
-  const xs=pts.map(p=>p.x), ys=pts.map(p=>p.y);
-  const xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys)*0.995,ymax=Math.max(...ys)*1.005;
-  const X=x=>P+(x-xmin)/((xmax-xmin)||1)*(W-P-8);
-  const Y=y=>H-24-(y-ymin)/((ymax-ymin)||1)*(H-24-12);
-  let d=pts.map((p,i)=>(i?'L':'M')+X(p.x).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' ');
-  let area=d+' L'+X(xmax)+' '+(H-24)+' L'+X(xmin)+' '+(H-24)+' Z';
-  const last=pts[pts.length-1];
-  let ticks='';
-  [xmin,Math.round((xmin+xmax)/2),xmax].forEach(t=>{ ticks+='<text x="'+X(t)+'" y="'+(H-8)+'" font-size="10" fill="#4a5560" font-family="IBM Plex Mono" text-anchor="middle">'+t+'</text>'; });
-  svg.innerHTML=
-    '<path d="'+area+'" fill="rgba(15,80,96,.08)"/>'+
-    '<path d="'+d+'" fill="none" stroke="#0f5060" stroke-width="2"/>'+
-    '<circle cx="'+X(last.x)+'" cy="'+Y(last.y)+'" r="3.5" fill="#0f5060"/>'+
-    '<text x="'+X(last.x)+'" y="'+(Y(last.y)-8)+'" font-size="11" font-weight="600" fill="#171d1f" font-family="IBM Plex Mono" text-anchor="end">'+(last.y/1e6).toFixed(2)+'M</text>'+
-    ticks;
-}
-function barChart(id, data){
-  const svg=document.getElementById(id); if(!data.length){svg.innerHTML='';return;}
-  const W=420,H=200,P=30, bw=(W-P-8)/data.length*0.6, gap=(W-P-8)/data.length;
-  const max=Math.max(...data.map(d=>d.cur))*1.08;
-  let out='';
-  data.forEach((d,i)=>{
-    const x=P+i*gap+gap*0.2;
-    const h=(d.cur/max)*(H-46);
-    out+='<rect x="'+x.toFixed(1)+'" y="'+(H-30-h).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+h.toFixed(1)+'" fill="#0f5060" rx="1"/>';
-    out+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-34-h).toFixed(1)+'" font-size="10" font-weight="600" fill="#171d1f" font-family="IBM Plex Mono" text-anchor="middle">'+(d.cur/1e6).toFixed(1)+'</text>';
-    out+='<text x="'+(x+bw/2).toFixed(1)+'" y="'+(H-14)+'" font-size="9.5" fill="#4a5560" font-family="IBM Plex Mono" text-anchor="middle">'+d.label+'</text>';
+function matrix(id,map,flowKeys,fmt,markMax){
+  const quarters=[{m:2,l:'dic–feb'},{m:5,l:'mar–may'},{m:8,l:'jun–ago'},{m:11,l:'sep–nov'}];
+  const years=[...new Set(flowKeys.map(k=>Math.floor(k/100)))].sort((a,b)=>a-b).slice(-8);
+  document.getElementById(id+'h').innerHTML='<tr><th>Trimestre</th>'+years.map((y,i)=>'<th class="'+(i===years.length-1?'hl-col':'')+'">'+y+'</th>').join('')+'<th>Δ i.a.</th></tr>';
+  let body='';
+  quarters.forEach(q=>{
+    // máximo del trimestre para resaltar
+    let max=-Infinity; years.forEach(y=>{const c=map.get(y*100+q.m);if(c&&c.v>max)max=c.v;});
+    const lastY=years[years.length-1];
+    const cur=map.get(lastY*100+q.m), prev=map.get((lastY-1)*100+q.m);
+    body+='<tr><td>'+q.l+'</td>'+years.map((y,i)=>{
+      const c=map.get(y*100+q.m); const v=c?c.v:null;
+      const isMax=markMax&&c&&v===max;
+      return '<td class="'+(i===years.length-1?'hl-col ':'')+(isMax?'hl':'')+'">'+(fmt(v))+'</td>';
+    }).join('')+pctCell(cur?cur.v:null,prev?prev.v:null)+'</tr>';
   });
-  svg.innerHTML=out;
+  document.getElementById(id+'b').innerHTML=body;
 }
 
-/* ---- Lean Hogs futures (Yahoo) ---- */
+/* ---- Yahoo Lean Hogs (tabla) ---- */
 async function fetchLeanHogs(){
   const paths=['/yahoo/v8/finance/chart/HE=F?range=1y&interval=1d','/yahoo2/v8/finance/chart/HE=F?range=1y&interval=1d'];
-  let lastErr=null;
-  for(const p of paths){
-    try{
-      const res=await fetch(p); if(!res.ok) throw new Error('HTTP '+res.status);
-      const j=await res.json(); const r=j.chart&&j.chart.result&&j.chart.result[0];
-      if(!r) throw new Error('respuesta vacía');
-      const ts=r.timestamp||[]; const cl=r.indicators.quote[0].close||[];
-      const pts=[]; for(let i=0;i<ts.length;i++){ if(cl[i]!=null) pts.push({t:ts[i]*1000,y:cl[i]}); }
-      return {pts, meta:r.meta};
-    }catch(e){ lastErr=e; }
-  }
-  throw lastErr||new Error('Yahoo no disponible');
+  let err=null;
+  for(const p of paths){try{
+    const res=await fetch(p); if(!res.ok)throw new Error('HTTP '+res.status);
+    const j=await res.json(); const r=j.chart&&j.chart.result&&j.chart.result[0]; if(!r)throw new Error('vacío');
+    const ts=r.timestamp||[], cl=r.indicators.quote[0].close||[]; const pts=[];
+    for(let i=0;i<ts.length;i++){if(cl[i]!=null)pts.push({t:ts[i]*1000,y:cl[i]});}
+    return {pts,meta:r.meta||{}};
+  }catch(e){err=e;}}
+  throw err||new Error('Yahoo no disponible');
 }
 function renderFutures(D){
-  const kv=document.getElementById('kpi-he-v'), ky=document.getElementById('kpi-he-y');
-  const meta=D.meta||{}; const price=meta.regularMarketPrice ?? (D.pts.length?D.pts[D.pts.length-1].y:null);
-  const prev=meta.chartPreviousClose ?? meta.previousClose;
-  kv.textContent = price!=null? price.toLocaleString('es-ES',{maximumFractionDigits:2}) : '—'; unskel(kv);
-  document.getElementById('kpi-he-u').textContent='USD/cwt';
-  if(price!=null&&prev){ setYoy(ky, yoyStr(price,prev)); ky.textContent=ky.textContent.replace('interanual','vs. cierre previo'); }
-  else { ky.textContent='—'; ky.className='k-yoy flat'; unskel(ky); }
-  // chart
-  const svg=document.getElementById('s5-chart'); const pts=D.pts;
-  if(pts.length){
-    const W=900,H=240,P=44;
-    const ys=pts.map(p=>p.y),ts=pts.map(p=>p.t);
-    const ymin=Math.min(...ys)*0.99,ymax=Math.max(...ys)*1.01,tmin=Math.min(...ts),tmax=Math.max(...ts);
-    const X=t=>P+(t-tmin)/((tmax-tmin)||1)*(W-P-10);
-    const Y=y=>H-28-(y-ymin)/((ymax-ymin)||1)*(H-28-14);
-    let d=pts.map((p,i)=>(i?'L':'M')+X(p.t).toFixed(1)+' '+Y(p.y).toFixed(1)).join(' ');
-    const last=pts[pts.length-1];
-    let grid=''; for(let g=0;g<=3;g++){ const yv=ymin+(ymax-ymin)*g/3; const yy=Y(yv);
-      grid+='<line x1="'+P+'" x2="'+(W-10)+'" y1="'+yy+'" y2="'+yy+'" stroke="#e6eae7"/>'+
-            '<text x="6" y="'+(yy+3)+'" font-size="10" fill="#4a5560" font-family="IBM Plex Mono">'+yv.toFixed(0)+'</text>'; }
-    let months=''; const seen=new Set();
-    pts.forEach(p=>{ const dt=new Date(p.t); const key=dt.getMonth(); if(!seen.has(key)&&dt.getDate()<=6){ seen.add(key);
-      months+='<text x="'+X(p.t)+'" y="'+(H-8)+'" font-size="9.5" fill="#4a5560" font-family="IBM Plex Mono" text-anchor="middle">'+MONTH_ES[dt.getMonth()+1].slice(0,3)+'</text>'; }});
-    svg.innerHTML=grid+'<path d="'+d+'" fill="none" stroke="#0f5060" stroke-width="1.8"/>'+
-      '<circle cx="'+X(last.t)+'" cy="'+Y(last.y)+'" r="3.5" fill="#b23a48"/>'+months;
-    document.getElementById('s5-cap').textContent='Lean Hogs continuous (HE=F), últimos 12 meses · USD por cwt · fuente Yahoo Finance';
-  }
-  // texto
-  const rangeMax=Math.max(...pts.map(p=>p.y)), rangeMin=Math.min(...pts.map(p=>p.y));
-  document.getElementById('s5-lede').innerHTML='Los futuros descuentan la historia de oferta de arriba: pesos y pig crop mueven los contratos cercanos; las intenciones de parición mueven los lejanos. '+
-    'En el último año HE=F ha oscilado entre <b>'+rangeMin.toFixed(1)+'</b> y <b>'+rangeMax.toFixed(1)+'</b> USD/cwt.';
+  const pts=D.pts; if(!pts.length)return renderFuturesError(new Error('sin puntos'));
+  const last=pts[pts.length-1];
+  const at=n=>pts[Math.max(0,pts.length-1-n)];
+  const ys=pts.map(p=>p.y); const hi=Math.max(...ys),lo=Math.min(...ys);
+  const rows=[
+    ['Último cierre',last.y,null,new Date(last.t).toLocaleDateString('es-ES')],
+    ['Hace ~1 semana',at(5).y,pct(last.y,at(5).y),new Date(at(5).t).toLocaleDateString('es-ES')],
+    ['Hace ~1 mes',at(21).y,pct(last.y,at(21).y),new Date(at(21).t).toLocaleDateString('es-ES')],
+    ['Hace ~6 meses',at(126).y,pct(last.y,at(126).y),new Date(at(126).t).toLocaleDateString('es-ES')],
+    ['Máximo 52 sem.',hi,pct(last.y,hi),''],
+    ['Mínimo 52 sem.',lo,pct(last.y,lo),''],
+  ];
+  document.getElementById('t7h').innerHTML='<tr><th>Referencia</th><th>USD/cwt</th><th>vs. último</th><th>Fecha</th></tr>';
+  document.getElementById('t7b').innerHTML=rows.map(r=>{
+    let ch='<td class="dim">—</td>';
+    if(r[2]!=null){const c=r[2]>0.05?'up':(r[2]<-0.05?'down':'flat');const a=r[2]>0?'▲':(r[2]<0?'▼':'▬');ch='<td class="'+c+'">'+a+' '+(r[2]>0?'+':'')+r[2].toFixed(1)+'%</td>';}
+    return '<tr'+(r[0]==='Último cierre'?' class="strong"':'')+'><td>'+r[0]+'</td><td class="hl">'+r[1].toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+'</td>'+ch+'<td class="dim">'+r[3]+'</td></tr>';
+  }).join('');
 }
 function renderFuturesError(err){
-  document.getElementById('kpi-he-v').textContent='n/d';
-  document.getElementById('kpi-he-v').classList.remove('skeleton');
-  const ky=document.getElementById('kpi-he-y'); ky.textContent='cotización no disponible'; ky.className='k-yoy flat'; ky.classList.remove('skeleton');
-  document.getElementById('s5-cap').textContent='Cotización no disponible ('+(err.message||'error')+'). El resto del informe no depende de Yahoo.';
-  document.getElementById('s5-lede').textContent='Los futuros Lean Hogs (HE=F) no se pudieron cargar en este momento. Revisa el proxy /yahoo en diagnostico.html.';
+  document.getElementById('t7h').innerHTML='<tr><th>Referencia</th><th>USD/cwt</th><th>vs. último</th><th>Fecha</th></tr>';
+  document.getElementById('t7b').innerHTML='<tr><td colspan="4" class="dim">Cotización no disponible ('+(err.message||'error')+'). El resto del informe no depende de Yahoo — revisa /diagnostico.html.</td></tr>';
 }
 
-function renderStamp(){
-  document.getElementById('stamp').textContent='Consultado '+new Date().toLocaleTimeString('es-ES');
-  const dot=document.getElementById('live-dot'); dot.classList.remove('stale');
+/* ---- ciclo ---- */
+let TIMER=null;
+async function load(){
+  clearTimeout(TIMER);
+  document.getElementById('fatal').style.display='none';
+  try{
+    const D=buildModel(await fetchPool());
+    render(D);
+    fetchLeanHogs().then(renderFutures).catch(renderFuturesError);
+    document.getElementById('stamp').textContent='Consultado '+new Date().toLocaleTimeString('es-ES');
+    document.getElementById('live-dot').classList.remove('stale');
+  }catch(err){
+    document.getElementById('fatal').style.display='block';
+    document.getElementById('fatal-detail').textContent='Detalle: '+(err&&err.message?err.message:err);
+    document.getElementById('live-dot').classList.add('stale');
+    document.querySelectorAll('.skeleton').forEach(el=>{el.classList.remove('skeleton');if(!el.textContent.trim())el.textContent='—';});
+  }
+  TIMER=setTimeout(()=>location.reload(),6*60*60*1000);
 }
-function showFatal(err){
-  document.getElementById('fatal').style.display='block';
-  document.getElementById('fatal-detail').textContent='Detalle: '+(err&&err.message?err.message:err);
-  document.getElementById('live-dot').classList.add('stale');
-  // quitar esqueletos para que no queden animando eternamente
-  document.querySelectorAll('.skeleton').forEach(el=>{ el.classList.remove('skeleton'); if(!el.textContent.trim()||/·|·/.test(el.textContent)) el.textContent='—'; });
-}
-
-document.getElementById('refreshBtn').addEventListener('click', load);
+document.getElementById('refreshBtn').addEventListener('click',load);
 load();
 </script>
 </body>
