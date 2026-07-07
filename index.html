@@ -182,14 +182,14 @@ const fmtN=v=>v==null?'—':v.toLocaleString('es-ES',{minimumFractionDigits:2,ma
 function pct(cur,prev){if(cur==null||prev==null||prev===0)return null;return (cur-prev)/prev*100;}
 function pctCell(cur,prev){const p=pct(cur,prev);if(p==null)return '<td class="dim">—</td>';const c=p>0.05?'up':(p<-0.05?'down':'flat');const a=p>0.05?'▲':(p<-0.05?'▼':'▬');return '<td class="'+c+'">'+a+' '+(p>0?'+':'')+p.toFixed(1)+'%</td>';}
 
-const isWeight=sd=>sd.startsWith('HOGS, MARKET, MEASURED IN LBS');
+const isWeight=sd=>sd.startsWith('HOGS, MARKET,');
 const INV_ITEMS=[
   {key:'all',  label:'Total cerdos y lechones', m:sd=>sd==='HOGS - INVENTORY'},
   {key:'breed',label:'Reproductores (breeding)', m:sd=>sd==='HOGS, BREEDING - INVENTORY'},
   {key:'mkt',  label:'Mercado (total)', m:sd=>sd==='HOGS, MARKET - INVENTORY'},
-  {key:'w50',  label:'Mercado · menos de 50 lb', m:sd=>isWeight(sd)&&(sd.includes('< 50')||sd.includes('LT 50')||sd.includes('UNDER 50'))},
-  {key:'w119', label:'Mercado · 50–119 lb', m:sd=>isWeight(sd)&&(sd.includes('50 TO 119')||sd.includes('50-119'))},
-  {key:'w179', label:'Mercado · 120–179 lb', m:sd=>isWeight(sd)&&(sd.includes('120 TO 179')||sd.includes('120-179'))},
+  {key:'w50',  label:'Mercado · menos de 50 lb', m:sd=>isWeight(sd)&&sd.includes('50')&&!sd.includes('119')&&!sd.includes('120')&&!sd.includes('179')&&!sd.includes('180')},
+  {key:'w119', label:'Mercado · 50–119 lb', m:sd=>isWeight(sd)&&sd.includes('119')},
+  {key:'w179', label:'Mercado · 120–179 lb', m:sd=>isWeight(sd)&&(sd.includes('120')||sd.includes('179'))},
   {key:'w180', label:'Mercado · 180 lb y más', m:sd=>isWeight(sd)&&sd.includes('180')},
 ];
 
@@ -211,6 +211,7 @@ function buildModel(raw){
     sd:(r.short_desc||'').toUpperCase().trim(), year:parseInt(r.year,10), val:num(r.Value),
     ref:r.reference_period_desc, unit:(r.unit_desc||'').toUpperCase(), dom:(r.domain_desc||'').toUpperCase()
   })).filter(r=> (r.dom===''||r.dom==='TOTAL') && r.val!=null && Number.isFinite(r.year));
+  console.log('NASS short_desc detectados:', [...new Set(rows.filter(r=>/MARKET,|FARROW|LITTER|INTENT|EXPECT/.test(r.sd)).map(r=>r.sd))]);
 
   // ---- inventario: item -> Map(key=year*100+month -> val) ----
   const invKeysSet=new Set(); const inv={};
@@ -225,15 +226,15 @@ function buildModel(raw){
 
   // ---- flujos: pigcrop/farrow/litter -> Map(key=year*100+endMonth -> val) ----
   const flowKeysSet=new Set();
-  function flowMap(test){const map=new Map();rows.filter(r=>test(r.sd)&&isQuarterFlow(r.ref)).forEach(r=>{const m=refMonth(r.ref);const k=r.year*100+m;map.set(k,{v:r.val,ref:r.ref,year:r.year,month:m});flowKeysSet.add(k);});return map;}
-  const pigcrop=flowMap(sd=>sd.includes('PIG CROP'));
-  const litter =flowMap(sd=>sd.includes('PER LITTER'));
-  const farrow =flowMap(sd=>sd.includes('FARROWING')&&!sd.includes('INTENTIONS'));
+  function flowMap(test){const map=new Map();rows.filter(r=>test(r)&&isQuarterFlow(r.ref)).forEach(r=>{const m=refMonth(r.ref);const k=r.year*100+m;map.set(k,{v:r.val,ref:r.ref,year:r.year,month:m});flowKeysSet.add(k);});return map;}
+  const pigcrop=flowMap(r=>r.sd.includes('PIG CROP'));
+  const litter =flowMap(r=>r.sd.includes('LITTER')&&r.val<100);
+  const farrow =flowMap(r=>r.sd.includes('FARROW')&&!r.sd.includes('INTENT')&&!r.sd.includes('EXPECT')&&r.val>=100000);
   const flowKeys=[...flowKeysSet].sort((a,b)=>b-a);
 
   // ---- intenciones ----
   const intMap=new Map();
-  rows.filter(r=>r.sd.includes('INTENTIONS')&&isQuarterFlow(r.ref)).forEach(r=>{const m=refMonth(r.ref);const k=r.year*100+m;intMap.set(k,{v:r.val,ref:r.ref,year:r.year,month:m});});
+  rows.filter(r=>(r.sd.includes('INTENT')||r.sd.includes('EXPECT'))&&isQuarterFlow(r.ref)).forEach(r=>{const m=refMonth(r.ref);const k=r.year*100+m;intMap.set(k,{v:r.val,ref:r.ref,year:r.year,month:m});});
   const intKeys=[...intMap.keys()].sort((a,b)=>b-a).slice(0,2).sort((a,b)=>a-b);
 
   return {rows,inv,invKeys,refKey,refDate,pigcrop,litter,farrow,flowKeys,intMap,intKeys};
